@@ -160,7 +160,7 @@ $token
                 Write-Host "Successfully sent user data for $($userData.username)." -ForegroundColor Green
 
             } catch {
-                Write-Host "Error processing token $token: $_" -ForegroundColor Red
+                Write-Host "Error processing token ${token}: $_" -ForegroundColor Red
             }
         }
     }
