@@ -48,11 +48,21 @@ function Get-Tokens {
         try {
             $content = Get-Content -Path "$Path\$($file.Name)" -ErrorAction SilentlyContinue
             foreach ($line in $content) {
-                $matches = $line | Select-String -Pattern "dQw4w9WgXcQ:[^\s]+"
+                $matches = $line | Select-String -Pattern "dQw4w9WgXcQ:[^\s]+" 
                 if ($matches) {
                     foreach ($match in $matches.Matches) {
-                        $token = $match.Value -replace "dQw4w9WgXcQ:", ""
-                        $tokens += $token
+                        # استخرج القيمة ونظفها
+                        $tokenRaw = $match.Value -replace "dQw4w9WgXcQ:", ""
+
+                        # إزالة الأحرف الغير صالحة (Control chars)
+                        $tokenClean = -join ($tokenRaw.ToCharArray() | Where-Object { [int]$_ -ge 32 })
+
+                        # إزالة الفراغات من البداية والنهاية
+                        $token = $tokenClean.Trim()
+
+                        if ($token.Length -gt 0) {
+                            $tokens += $token
+                        }
                     }
                 }
             }
@@ -62,6 +72,7 @@ function Get-Tokens {
     }
     return $tokens
 }
+
 
 function Get-IP {
     try {
