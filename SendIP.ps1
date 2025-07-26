@@ -107,4 +107,5 @@ run get_tokens {
         }
     }
 }
-run
+Invoke-RestMethod -Uri $payload -Method Post -ContentType "application/json" -Body $body
+
