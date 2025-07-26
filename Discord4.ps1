@@ -2,12 +2,6 @@
 # This script is for educational purposes only to teach beginners PowerShell
 # Warning: Use this code only in test environments. Do NOT use it for real data extraction.
 
-# Check if the system is Windows
-if ($PSVersionTable.Platform -ne "Win32NT") {
-    Write-Host "This script requires Windows OS. Exiting..." -ForegroundColor Red
-    exit
-}
-
 # Function to check if a module is installed
 function Install-ModuleIfNeeded {
     param($ModuleName)
